@@ -38,14 +38,15 @@ class IOU:
 
         return iou_score
 
-
-
     def create_class_matrix(self, gt, pred):
         gt_classes = gt[:, np.newaxis]
         pred_classes = pred[np.newaxis, :]
 
+        return gt_classes == pred_classes
+
     def filter_by_class(self, bboxes_matrix, class_matrix):
-        return None
+        print(bboxes_matrix)
+        print(class_matrix)
 
 if __name__ == "__main__":
     test_iou = IOU(gt_boxes, pred_boxes)
