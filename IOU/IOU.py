@@ -2,12 +2,14 @@ import numpy as np
 from sample import *
 
 class IOU:
-    def __init__(self, gt_bboxes, pred_bboxes):
+    def __init__(self, gt_bboxes, pred_bboxes, threshold=0.5):
         self.gt_bboxes = gt_bboxes
         self.pred_bboxes = pred_bboxes
+        self.threshold = threshold
 
     def calculate_iou(self):
         filtered_bboxes = self.matching_bboxes(self.gt_bboxes, self.pred_bboxes)
+        print(filtered_bboxes)
 
     def matching_bboxes(self, gt_bboxes, pred_bboxes):
         bboxes_matrix = self.create_bboxes_matrix(gt_bboxes[:, :4], pred_bboxes[:, :4])
@@ -45,8 +47,8 @@ class IOU:
         return gt_classes == pred_classes
 
     def filter_by_class(self, bboxes_matrix, class_matrix):
-        print(bboxes_matrix)
-        print(class_matrix)
+        return bboxes_matrix * class_matrix
+
 
 if __name__ == "__main__":
     test_iou = IOU(gt_boxes, pred_boxes)
