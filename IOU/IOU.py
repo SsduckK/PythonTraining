@@ -12,9 +12,9 @@ class IOU:
         print(filtered_bboxes)
 
     def matching_bboxes(self, gt_bboxes, pred_bboxes):
-        bboxes_matrix = self.create_bboxes_matrix(gt_bboxes[:, :4], pred_bboxes[:, :4])
+        score_matrix, bboxes_pair = self.create_bboxes_matrix(gt_bboxes[:, :4], pred_bboxes[:, :4])
         class_matrix = self.create_class_matrix(gt_bboxes[:, 4], pred_bboxes[:, 4])
-        filtered_bboxes = self.filter_by_class(bboxes_matrix, class_matrix)
+        filtered_bboxes = self.filter_by_class(score_matrix, class_matrix, bboxes_pair)
         return filtered_bboxes
 
     def create_bboxes_matrix(self, gt, pred):
@@ -26,8 +26,8 @@ class IOU:
         x2 = np.minimum(gt_bboxes[..., 2], pred_bboxes[..., 2])
         y2 = np.minimum(gt_bboxes[..., 3], pred_bboxes[..., 3])
 
-        inter_x = np.abs(x2 - x1)
-        inter_y = np.abs(y2 - y1)
+        inter_x = np.maximum(0, x2 - x1)
+        inter_y = np.maximum(0, y2 - y1)
 
         inter_area = inter_x * inter_y
 
@@ -38,7 +38,12 @@ class IOU:
 
         iou_score = inter_area / union_area
 
-        return iou_score
+        gt_b = np.repeat(gt_bboxes, repeats=4, axis=1)    # (3, 4, 4)
+        pred_b = np.repeat(pred_bboxes, repeats=3, axis=0)  # (3, 4, 4)
+        
+        concatenated_pair = np.concatenate([gt_b, pred_b], axis=-1)  # (3, 4, 8)
+
+        return iou_score, concatenated_pair
 
     def create_class_matrix(self, gt, pred):
         gt_classes = gt[:, np.newaxis]
@@ -46,8 +51,12 @@ class IOU:
 
         return gt_classes == pred_classes
 
-    def filter_by_class(self, bboxes_matrix, class_matrix):
-        return bboxes_matrix * class_matrix
+    def filter_by_class(self, score_matrix, class_matrix, bboxes_pair):
+        score_mask = score_matrix > self.threshold
+        class_score_filter = score_mask * class_matrix
+        valid_bboxes_pair = class_score_filter[..., np.newaxis] * bboxes_pair
+        
+        return valid_bboxes_pair
 
 
 if __name__ == "__main__":
