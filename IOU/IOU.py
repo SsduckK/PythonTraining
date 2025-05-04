@@ -9,7 +9,15 @@ class IOU:
 
     def calculate_iou(self):
         filtered_bboxes = self.matching_bboxes(self.gt_bboxes, self.pred_bboxes)
-        print(filtered_bboxes)
+        non_zero_mask = np.all(filtered_bboxes, axis=-1)
+        valid_index = np.where(non_zero_mask == True)
+
+        valid_iou_list = []
+        for i in range(len(self.gt_bboxes)):
+            valid_iou_list.append(filtered_bboxes[valid_index[0][i]][valid_index[1][i]]) # N x 9
+            # gt x1, y1, x2, y2, pred x1, y1, x2, y2, class_id
+
+        return valid_iou_list
 
     def matching_bboxes(self, gt_bboxes, pred_bboxes):
         score_matrix, bboxes_pair = self.create_bboxes_matrix(gt_bboxes[:, :4], pred_bboxes[:, :4])
