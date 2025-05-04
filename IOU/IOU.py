@@ -49,11 +49,12 @@ class IOU:
         gt_classes = gt[:, np.newaxis]
         pred_classes = pred[np.newaxis, :]
         matched_class_mask = gt_classes == pred_classes
-        valid_class = gt_classes * matched_class_mask
+        class_id_matrix = gt_classes * matched_class_mask
 
-        return valid_class
+        return class_id_matrix
 
     def filter_by_class(self, score_matrix, class_matrix, bboxes_pair):
+
         score_mask = score_matrix > self.threshold
         class_score_filter = score_mask * class_matrix
         valid_bboxes_pair = class_score_filter[..., np.newaxis] * bboxes_pair
