@@ -13,8 +13,8 @@ class IOU:
 
     def matching_bboxes(self, gt_bboxes, pred_bboxes):
         score_matrix, bboxes_pair = self.create_bboxes_matrix(gt_bboxes[:, :4], pred_bboxes[:, :4])
-        class_matrix = self.create_class_matrix(gt_bboxes[:, 4], pred_bboxes[:, 4])
-        filtered_bboxes = self.filter_by_class(score_matrix, class_matrix, bboxes_pair)
+        class_id_matrix = self.create_class_matrix(gt_bboxes[:, 4], pred_bboxes[:, 4])
+        filtered_bboxes = self.filter_by_class(score_matrix, class_id_matrix, bboxes_pair)
         return filtered_bboxes
 
     def create_bboxes_matrix(self, gt, pred):
@@ -53,12 +53,14 @@ class IOU:
 
         return class_id_matrix
 
-    def filter_by_class(self, score_matrix, class_matrix, bboxes_pair):
-
+    def filter_by_class(self, score_matrix, class_id_matrix, bboxes_pair):
         score_mask = score_matrix > self.threshold
-        class_score_filter = score_mask * class_matrix
+
+        valid_class_matrix = ((class_id_matrix * score_mask) != 0)
+        class_score_filter = score_mask * valid_class_matrix
         valid_bboxes_pair = class_score_filter[..., np.newaxis] * bboxes_pair
-        
+        valid_bboxes_pair = np.concatenate([valid_bboxes_pair, valid_class_matrix[..., np.newaxis]], axis=-1)
+
         return valid_bboxes_pair
 
 
