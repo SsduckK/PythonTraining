@@ -64,7 +64,7 @@ class IOU:
     def filter_by_class(self, score_matrix, class_id_matrix, bboxes_pair):
         score_mask = score_matrix > self.threshold
 
-        valid_class_matrix = ((class_id_matrix * score_mask) != 0)
+        valid_class_matrix = (class_id_matrix * score_mask)
         class_score_filter = score_mask * valid_class_matrix
         valid_bboxes_pair = class_score_filter[..., np.newaxis] * bboxes_pair
         valid_bboxes_pair = np.concatenate([valid_bboxes_pair, valid_class_matrix[..., np.newaxis]], axis=-1)
