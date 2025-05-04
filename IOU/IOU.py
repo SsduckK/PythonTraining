@@ -48,8 +48,10 @@ class IOU:
     def create_class_matrix(self, gt, pred):
         gt_classes = gt[:, np.newaxis]
         pred_classes = pred[np.newaxis, :]
+        matched_class_mask = gt_classes == pred_classes
+        valid_class = gt_classes * matched_class_mask
 
-        return gt_classes == pred_classes
+        return valid_class
 
     def filter_by_class(self, score_matrix, class_matrix, bboxes_pair):
         score_mask = score_matrix > self.threshold
