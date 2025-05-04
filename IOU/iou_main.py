@@ -8,6 +8,7 @@ def main():
 
     vis = Visualizer()
     vis.draw_bboxes(iou_list)
+    vis.visualize()
 
 
 if __name__ == "__main__":
